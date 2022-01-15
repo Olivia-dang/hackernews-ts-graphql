@@ -1,0 +1,21 @@
+{
+  "name": "hackernews-typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "apollo-server": "^3.6.1",
+    "graphql": "^15.8.0",
+    "nexus": "^1.1.0"
+  }
+}
