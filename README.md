@@ -14,9 +14,11 @@ Tutorial for this project is here
 - What is the role of Prisma Client in the GraphQL API?
 
   - It connects your GraphQL server to the database
+  - Prisma Client exposes a CRUD API for the models in your schema for you to read and write in your database. These methods are auto-generated based on your model definitions in schema.prisma
 
-- What is the second argument that's passed into GraphQL resolvers used for? `resolve(parent, args, context)`
-  - It carries the arguments for the incoming GraphQL operation
+- `resolve(parent, args, context, info)`
+  - `args` carries the arguments for the incoming GraphQL operation
+  - `context`lets resolvers communicate with each other (The context argument is a plain JavaScript object that every resolver in the resolver chain can read from and write to)
 
 -
 
@@ -101,3 +103,4 @@ export const LinkMutation = extendType({
     url         String
   }
   ```
+

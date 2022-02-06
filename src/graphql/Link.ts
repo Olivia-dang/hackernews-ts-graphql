@@ -1,5 +1,4 @@
 import { extendType, nonNull, objectType, stringArg } from "nexus";
-import { NexusGenObjects } from "../../nexus-typegen";
 
 export const Link = objectType({
   name: "Link",
@@ -7,21 +6,17 @@ export const Link = objectType({
     t.nonNull.int("id");
     t.nonNull.string("description");
     t.nonNull.string("url");
+    t.field("postedBy", {
+      // add an optional field without "nonNull"
+      type: "User",
+      resolve(parent, args, context) {
+        return context.prisma.link
+          .findUnique({ where: { id: parent.id } })
+          .postedBy();
+      },
+    });
   },
 });
-
-let links: NexusGenObjects["Link"][] = [
-  {
-    id: 1,
-    url: "www.howtographql.com",
-    description: "Fullstack tutorial for GraphQL",
-  },
-  {
-    id: 2,
-    url: "graphql.org",
-    description: "GraphQL official website",
-  },
-];
 
 export const LinkQuery = extendType({
   type: "Query",
@@ -29,7 +24,8 @@ export const LinkQuery = extendType({
     t.nonNull.list.nonNull.field("feed", {
       type: "Link",
       resolve(parent, args, context, info) {
-        return links;
+        // using the PrismaClient instance available through context.prisma.
+        return context.prisma.link.findMany();
       },
     });
   },
@@ -38,7 +34,7 @@ export const LinkQuery = extendType({
 export const LinkMutation = extendType({
   type: "Mutation",
   definition(t) {
-    t.nonNull.field("post", {
+    t.nonNull.field("createLink", {
       type: "Link",
       args: {
         description: nonNull(stringArg()),
@@ -47,15 +43,22 @@ export const LinkMutation = extendType({
 
       resolve(parent, args, context) {
         const { description, url } = args;
+        const { userId } = context;
 
-        let idCount = links.length + 1;
-        const link = {
-          id: idCount,
-          description: args.description,
-          url: args.url,
-        };
-        links.push(link);
-        return link;
+        if (!userId) {
+          // 1
+          throw new Error("Cannot post without logging in.");
+        }
+
+        // calling the create method on the Link model from your Prisma Client API
+        const newLink = context.prisma.link.create({
+          data: {
+            description,
+            url,
+            postedBy: { connect: { id: userId } }, // 2
+          },
+        });
+        return newLink;
       },
     });
   },

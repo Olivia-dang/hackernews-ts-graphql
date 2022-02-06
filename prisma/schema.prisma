@@ -11,8 +11,19 @@ datasource db {
 }
 
 model Link {
-  id          Int      @id @default(autoincrement())   // 4
-  createdAt   DateTime @default(now())  // 5
+  id          Int      @id @default(autoincrement())   
+  createdAt   DateTime @default(now())  
   description String
   url         String
+  // define the relation by annotating the postedBy field with the @relation attribute.
+  postedBy    User?    @relation(fields: [postedById], references: [id])
+  postedById  Int?
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  links     Link[]
 }
