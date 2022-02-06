@@ -46,7 +46,7 @@ export const LinkMutation = extendType({
         const { userId } = context;
 
         if (!userId) {
-          // 1
+          // only authorized users can add a new link.
           throw new Error("Cannot post without logging in.");
         }
 
@@ -55,7 +55,7 @@ export const LinkMutation = extendType({
           data: {
             description,
             url,
-            postedBy: { connect: { id: userId } }, // 2
+            postedBy: { connect: { id: userId } }, // The connect operator is used by Prisma to specify which user the newly created link should be associated with.
           },
         });
         return newLink;

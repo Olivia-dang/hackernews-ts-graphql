@@ -8,6 +8,8 @@ export const prisma = new PrismaClient();
 // Right now it’s just an instance of PrismaClient
 export interface Context {
   prisma: PrismaClient;
+  // The context interface is updated to have a userId type.
+  // This is optional because no userId will be attached to the context when requests are sent without the Authorization header.
   userId?: number;
 }
 
