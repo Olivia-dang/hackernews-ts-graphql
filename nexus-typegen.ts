@@ -166,6 +166,13 @@ export interface NexusGenArgTypes {
       linkId: number; // Int!
     }
   }
+  Query: {
+    feed: { // args
+      filter?: string | null; // String
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

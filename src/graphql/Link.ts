@@ -1,4 +1,4 @@
-import { extendType, nonNull, objectType, stringArg } from "nexus";
+import { extendType, intArg, nonNull, objectType, stringArg } from "nexus";
 
 export const Link = objectType({
   name: "Link",
@@ -33,9 +33,26 @@ export const LinkQuery = extendType({
   definition(t) {
     t.nonNull.list.nonNull.field("feed", {
       type: "Link",
+      args: {
+        filter: stringArg(), // this `filter` argument is optional
+        skip: intArg(), //The start index is called skip, since you’re skipping that many elements in the list before collecting the items to be returned. If skip is not provided, it’s 0 by default.
+        take: intArg(), // the limit is called "take", meaning you’re “taking” x elements after a provided start index.
+      },
       resolve(parent, args, context, info) {
+        const where = args.filter
+          ? {
+              OR: [
+                { description: { contains: args.filter } },
+                { url: { contains: args.filter } },
+              ],
+            }
+          : {};
         // using the PrismaClient instance available through context.prisma.
-        return context.prisma.link.findMany();
+        return context.prisma.link.findMany({
+          where,
+          skip: args?.skip as number | undefined,
+          take: args?.take as number | undefined,
+        });
       },
     });
   },
