@@ -1,4 +1,15 @@
-import { extendType, intArg, nonNull, objectType, stringArg } from "nexus";
+import { Prisma } from "@prisma/client";
+import {
+  arg,
+  enumType,
+  extendType,
+  inputObjectType,
+  intArg,
+  list,
+  nonNull,
+  objectType,
+  stringArg,
+} from "nexus";
 
 export const Link = objectType({
   name: "Link",
@@ -28,6 +39,21 @@ export const Link = objectType({
   },
 });
 
+// Create a new input type and enum to define the ordering options for sorting:
+export const LinkOrderByInput = inputObjectType({
+  name: "LinkOrderByInput",
+  definition(t) {
+    t.field("description", { type: Sort });
+    t.field("url", { type: Sort });
+    t.field("createdAt", { type: Sort });
+  },
+});
+
+export const Sort = enumType({
+  name: "Sort",
+  members: ["asc", "desc"],
+});
+
 export const LinkQuery = extendType({
   type: "Query",
   definition(t) {
@@ -37,6 +63,7 @@ export const LinkQuery = extendType({
         filter: stringArg(), // this `filter` argument is optional
         skip: intArg(), //The start index is called skip, since you’re skipping that many elements in the list before collecting the items to be returned. If skip is not provided, it’s 0 by default.
         take: intArg(), // the limit is called "take", meaning you’re “taking” x elements after a provided start index.
+        orderBy: arg({ type: list(nonNull(LinkOrderByInput)) }),
       },
       resolve(parent, args, context, info) {
         const where = args.filter
@@ -52,6 +79,9 @@ export const LinkQuery = extendType({
           where,
           skip: args?.skip as number | undefined,
           take: args?.take as number | undefined,
+          orderBy: args?.orderBy as
+            | Prisma.Enumerable<Prisma.LinkOrderByWithRelationInput> //typecasting is necessary to strip the null option from the Nexus generated type.
+            | undefined,
         });
       },
     });
