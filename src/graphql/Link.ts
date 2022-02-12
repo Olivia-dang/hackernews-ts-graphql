@@ -54,18 +54,26 @@ export const Sort = enumType({
   members: ["asc", "desc"],
 });
 
+export const Feed = objectType({
+  name: "Feed",
+  definition(t) {
+    t.nonNull.list.nonNull.field("links", { type: Link });
+    t.nonNull.int("count");
+  },
+});
+
 export const LinkQuery = extendType({
   type: "Query",
   definition(t) {
-    t.nonNull.list.nonNull.field("feed", {
-      type: "Link",
+    t.nonNull.field("feed", {
+      type: "Feed",
       args: {
         filter: stringArg(), // this `filter` argument is optional
         skip: intArg(), //The start index is called skip, since you’re skipping that many elements in the list before collecting the items to be returned. If skip is not provided, it’s 0 by default.
         take: intArg(), // the limit is called "take", meaning you’re “taking” x elements after a provided start index.
         orderBy: arg({ type: list(nonNull(LinkOrderByInput)) }),
       },
-      resolve(parent, args, context, info) {
+      async resolve(parent, args, context, info) {
         const where = args.filter
           ? {
               OR: [
@@ -75,7 +83,7 @@ export const LinkQuery = extendType({
             }
           : {};
         // using the PrismaClient instance available through context.prisma.
-        return context.prisma.link.findMany({
+        const links = context.prisma.link.findMany({
           where,
           skip: args?.skip as number | undefined,
           take: args?.take as number | undefined,
@@ -83,6 +91,8 @@ export const LinkQuery = extendType({
             | Prisma.Enumerable<Prisma.LinkOrderByWithRelationInput> //typecasting is necessary to strip the null option from the Nexus generated type.
             | undefined,
         });
+        const count = await context.prisma.link.count({ where });
+        return { links, count };
       },
     });
   },
