@@ -6,6 +6,7 @@ export const Link = objectType({
     t.nonNull.int("id");
     t.nonNull.string("description");
     t.nonNull.string("url");
+    t.nonNull.dateTime("createdAt"); // so long as createdAt field already exists in the Link Prisma model.
     t.field("postedBy", {
       // add an optional field without "nonNull"
       type: "User",
@@ -13,6 +14,15 @@ export const Link = objectType({
         return context.prisma.link
           .findUnique({ where: { id: parent.id } })
           .postedBy();
+      },
+    });
+    t.nonNull.list.nonNull.field("voters", {
+      // 1
+      type: "User",
+      resolve(parent, args, context) {
+        return context.prisma.link
+          .findUnique({ where: { id: parent.id } })
+          .voters();
       },
     });
   },

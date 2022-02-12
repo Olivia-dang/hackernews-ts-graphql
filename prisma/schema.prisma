@@ -16,8 +16,9 @@ model Link {
   description String
   url         String
   // define the relation by annotating the postedBy field with the @relation attribute.
-  postedBy    User?    @relation(fields: [postedById], references: [id])
+  postedBy    User?    @relation(name: "PostedBy", fields: [postedById], references: [id]) 
   postedById  Int?
+  voters      User[]   @relation(name: "Votes") // many-to-many relationship
 }
 
 model User {
@@ -25,5 +26,6 @@ model User {
   name      String
   email     String   @unique
   password  String
-  links     Link[]
+  links    Link[] @relation(name: "PostedBy")  // one-to-many relationship
+  votes    Link[] @relation(name: "Votes")  // many-to-many relationship
 }
